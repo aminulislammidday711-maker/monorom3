@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monorom - Login</title>
+
+    <style>
+        :root {
+            --forest: #2D5F4F;
+            --forest-dark: #1F4438;
+            --gold: #C89B3C;
+            --cream: #FBF6EC;
+            --ink: #23302B;
+            --ink-soft: #4B5A54;
+            --line: #E1D8C2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", "Noto Sans", "Noto Sans Devanagari", "Noto Sans Bengali", Verdana, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            background: var(--cream);
+            color: var(--ink);
+        }
+
+        body {
+            background-image:
+                linear-gradient(180deg, rgba(251,246,236,0.96), rgba(251,246,236,0.98)),
+                repeating-linear-gradient(135deg, rgba(200,155,60,0.06) 0px, rgba(200,155,60,0.06) 2px, transparent 2px, transparent 26px);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 20px;
+            border-bottom: 6px solid var(--gold);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            padding: 30px 28px;
+        }
+
+        .auth-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        .auth-logo img {
+            height: 60px;
+            width: auto;
+            border-radius: 10px;
+        }
+
+        .auth-view h2 {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--ink);
+            margin-bottom: 6px;
+        }
+
+        .auth-sub {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .auth-view form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .auth-view label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 6px;
+            margin-top: 12px;
+        }
+
+        .auth-view input {
+            border: 2px solid var(--line);
+            border-radius: 10px;
+            padding: 11px 14px;
+            font-size: 0.95rem;
+            color: var(--ink);
+            outline: none;
+            background: var(--cream);
+        }
+
+        .auth-view input:focus {
+            border-color: var(--gold);
+        }
+
+        .auth-btn {
+            margin-top: 20px;
+            background: var(--forest);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 13px 16px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        .auth-btn:hover {
+            background: var(--forest-dark);
+        }
+
+        .auth-btn:active {
+            transform: scale(0.98);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .auth-error {
+            margin-top: 14px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #b91c1c;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 10px 12px;
+            border-radius: 10px;
+        }
+
+        .auth-demo-note {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 0.72rem;
+            font-style: italic;
+            color: var(--ink-soft);
+            opacity: 0.85;
+        }
+
+        @media (max-width: 600px) {
+            .auth-card {
+                padding: 24px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-card">
+        <div class="auth-logo">
+            <img src="logo.png" alt="Monorom Logo">
+        </div>
+
+        <div class="auth-view">
+            <h2>Welcome Back</h2>
+            <p class="auth-sub">Login to see your own reminders and settings</p>
+
+            <form id="loginForm">
+                <label for="loginIdentifier">Mobile Number</label>
+                <input type="text" id="loginIdentifier" placeholder="9831567567" inputmode="numeric" autocomplete="username" required>
+
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password" required>
+
+                <div class="auth-error" id="loginError" hidden></div>
+
+                <button type="submit" class="auth-btn" id="loginSubmitBtn">Login</button>
+            </form>
+
+            <p class="auth-demo-note">Use mobile number 9831567567 and the password provided to you to sign in.</p>
+        </div>
+    </div>
+
+    <script>
+        const VALID_MOBILE = "9831567567";
+        const VALID_PASSWORD = "Aminul@1";
+        const SESSION_KEY = "monorom_logged_in";
+
+        // Auto-redirect if already logged in
+        if (localStorage.getItem(SESSION_KEY) === "1") {
+            window.location.href = "index.html";
+        }
+
+        function normalizeMobile(raw) {
+            let cleaned = String(raw || "").replace(/[\s\-()]/g, "");
+            cleaned = cleaned.replace(/^\+?91/, "");
+            return cleaned;
+        }
+
+        function showError(message) {
+            const errorBox = document.getElementById("loginError");
+            errorBox.textContent = message;
+            errorBox.hidden = false;
+        }
+
+        function hideError() {
+            document.getElementById("loginError").hidden = true;
+        }
+
+        function setSubmitting(state) {
+            const button = document.getElementById("loginSubmitBtn");
+            button.disabled = state;
+            button.textContent = state ? "Please wait…" : "Login";
+        }
+
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            hideError();
+
+            const mobileInput = document.getElementById("loginIdentifier");
+            const passwordInput = document.getElementById("loginPassword");
+            const mobile = normalizeMobile(mobileInput.value);
+            const password = passwordInput.value;
+
+            if (mobile === VALID_MOBILE && password === VALID_PASSWORD) {
+                setSubmitting(true);
+                localStorage.setItem(SESSION_KEY, "1");
+                // Explicitly jump to index.html upon success
+                window.location.href = "index.html"; 
+            } else {
+                showError("Incorrect mobile number or password. Please try again.");
+                passwordInput.value = "";
+                passwordInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>
